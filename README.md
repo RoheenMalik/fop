@@ -1,1 +1,2 @@
 # fop
+The Hospital Management System can help any hospital or healthcare facility by boosting productivity, lowering paperwork, and enhancing patient care. The Hospital Management System in C++ simplifies the process for hospitals and other healthcare organizations to manage medical records, and appointments. Among the information stored in the system are  medical history, medication details. A hospital management system that keeps records of doctors, their appointments, patients, staff, and more using file handling (in C++).
