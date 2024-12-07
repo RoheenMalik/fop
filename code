@@ -1,0 +1,618 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <limits> 
+#include<windows.h>
+#undef max
+using namespace std;
+struct Patient
+{
+    string name;
+    int age = 0;
+    char gender = ' ';
+    string disability;
+    string phone;
+};
+struct Doctor
+{
+    string name;
+    string specialty;
+    string gender;
+    string shift;
+};
+struct Appointment
+{
+    string doctorName;
+    string patientName;
+    string time;
+};
+struct Prescription
+{
+    string patientName;
+    string prescription;
+};
+Patient patients[100];
+Doctor doctors[100];
+Appointment appointments[100];
+Prescription prescriptions[100];
+int patientCount = 0;
+int doctorCount = 0;
+int appointmentCount = 0;
+int prescriptionCount = 0;
+
+void user();
+void admin();
+void patientMenu();
+void doctorUser(const string& doctorName);
+void registration();
+void writePatientToFile(int index);
+void bookAppointment();
+void writeAppointmentsToFile();
+void viewAllAppointments();
+void viewOneAppointment();
+void viewPrescription();
+void doctorRegistration();
+void writeDoctorsToFile();
+void seeAppointments(const string& doctorName);
+void writePrescription();
+void readPrescriptionsFromFile();
+void readAppointmentsFromFile();
+void readPatientsFromFile();
+void readfromDfile();
+string trim(const string& str);
+
+int main()
+{
+    cout << "\t-----------------------------WELCOME TO MEDI-CARE-HUB---------------------------------\n";
+    cout << "                           _________________________________________                     \n";
+    Sleep(2000);
+   // readfromDfile();
+    user();
+    return 0;
+}
+void user()
+{
+    int choice;
+    do {
+        cout << "\t\t\t\t\t......MENU......\n";
+        cout << "\t\t\t\t\tHello dear User!\n";
+        cout << "\t\t\t\t\t1. Patient\n\t\t\t\t\t2. Doctor\n\t\t\t\t\t3. Admin\n\t\t\t\t\t0. Exit\n\t\t\t\t\tEnter your choice: ";
+        cin >> choice;
+        cout << "--------------------------------------------------------------------------------------------------------------------\n";
+        switch (choice)
+        {
+        case 1:
+            system("Cls");
+            patientMenu();
+
+            break;
+        case 2:
+        {
+            system("Cls");
+            cin.ignore();
+            cout << "Enter doctor name: ";
+            string doctorName;
+            getline(cin, doctorName);
+            system("Cls");
+            doctorUser(doctorName);
+        }
+        break;
+        case 3:
+            system("Cls");
+            admin();
+            break;
+        case 0:
+            system("Cls");
+            cout << "Exiting program.\n";
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (choice != 0);
+}
+void viewAllPatients()
+{
+    system("Cls");
+    readPatientsFromFile();
+    cout << "All Patients:\n";
+    for (int i = 0; i < patientCount; ++i)
+    {
+        cout << "Name: " << patients[i].name << "\n";
+        cout << "Age: " << patients[i].age << "\n";
+        cout << "Gender: " << patients[i].gender << "\n";
+        cout << "Disability: " << patients[i].disability << "\n";
+        cout << "Phone: " << patients[i].phone << "\n\n";
+    }
+}
+void admin()
+{
+    string password;
+    cout << "\n\t\t\t\t\tEnter admin password: ";
+    cin >> password;
+    if (password == "adminpass")
+    {
+        cout << "\n\t\t\t\t\tLogin successful.\n";
+        int adminChoice;
+        do {
+            cout << "\n\t\t\t\t\t.....Admin Menu.....\n";
+            cout << "\t\t\t\t\t1. Enroll Patient\n";
+            cout << "\t\t\t\t\t2. Enroll Doctor\n";
+            cout << "\t\t\t\t\t3. View All Patients\n";
+            cout << "\t\t\t\t\t4. View All Appointments\n";
+            cout << "\t\t\t\t\t0. Exit\n";
+            cout << "\t\t\t\t\tEnter your choice: ";
+            cin >> adminChoice;
+            switch (adminChoice)
+            {
+            case 1:
+                registration();
+                break;
+            case 2:
+                doctorRegistration();
+                break;
+            case 3:
+                viewAllPatients();
+                break;
+            case 4:
+                viewAllAppointments();
+                break;
+            case 0:
+                cout << "Exiting program.\n";
+                cout << "----------------------------------------------------------------------------------------------------------\n";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.\n";
+            }
+        } while (adminChoice != 0);
+    }
+    else
+    {
+        cout << "Incorrect password. Exiting program.\n";
+    }
+}
+void patientMenu()
+{
+    int patientChoice;
+    do {
+        cout << "\n\t\t\t\t\t.....Patient Menu.....\n";
+        cout << "\t\t\t\t\t1. Registration\n";
+        cout << "\t\t\t\t\t2. Book Appointment\n";
+        cout << "\t\t\t\t\t3. View All Appointments\n";
+        cout << "\t\t\t\t\t4. View One Appointment\n";
+        cout << "\t\t\t\t\t5. View Prescription\n";
+        cout << "\t\t\t\t\t0. Exit\n";
+        cout << "\t\t\t\t\tEnter your choice: ";
+        cin >> patientChoice;
+        switch (patientChoice)
+        {
+        case 1:
+            registration();
+            break;
+        case 2:
+            bookAppointment();
+            break;
+        case 3:
+            viewAllAppointments();
+            break;
+        case 4:
+            viewOneAppointment();
+            break;
+        case 5:
+            viewPrescription();
+            break;
+        case 0:
+            cout << "Exiting program.\n";
+            cout << "-----------------------------------------------------------------------------------------------------------------\n";
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (patientChoice != 0);
+}
+void doctorUser(const string& doctorName)
+{
+    int doctorChoice;
+    do {
+        cout << "\n\t\t\t\t\t......Doctor Menu.....\n";
+        cout << "\t\t\t\t\t1. See Appointments\n";
+        cout << "\t\t\t\t\t2. Write Prescription\n";
+        cout << "\t\t\t\t\t0. Exit\n";
+        cout << "\t\t\t\t\tEnter your choice: ";
+        cin >> doctorChoice;
+        switch (doctorChoice)
+        {
+        case 1:
+            seeAppointments(doctorName);
+            break;
+        case 2:
+            writePrescription();
+            break;
+        case 0:
+            cout << "Exiting program.\n";
+            cout << "-------------------------------------------------------------------------------------------------------------\n";
+            break;
+        default:
+            cout << "Invalid choice. Please try again.\n";
+        }
+    } while (doctorChoice != 0);
+}
+void registration()
+{
+    system("Cls");
+    if (patientCount < 100)
+    {
+        cout << "Enter patient details:\n";
+        do
+        {
+            cout << "Name: ";
+            getline(cin, patients[patientCount].name);
+        } while (patients[patientCount].name.empty());
+        do
+        {
+            cout << "Age: ";
+            while (!(cin >> patients[patientCount].age) || patients[patientCount].age < 0)
+            {
+                cout << "Invalid input. Please enter a valid age: ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        } while (patients[patientCount].age < 0);
+        do
+        {
+            cout << "Gender (M/F): ";
+            while (!(cin >> patients[patientCount].gender) || (patients[patientCount].gender != 'M' && patients[patientCount].gender != 'F' && patients[patientCount].gender != 'm' && patients[patientCount].gender != 'f'))
+            {
+                cout << "Invalid input. Please enter a valid gender (M/F): ";
+                cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            }
+        } while (patients[patientCount].gender != 'M' && patients[patientCount].gender != 'F' && patients[patientCount].gender != 'm' && patients[patientCount].gender != 'f');
+
+        do
+        {
+            cout << "Disability: ";
+            cin.ignore();
+            getline(cin, patients[patientCount].disability);
+        } while (patients[patientCount].disability.empty());
+        do
+        {
+            cout << "Contact Number: ";
+            cin.ignore();
+            getline(cin, patients[patientCount].phone);
+        } while (patients[patientCount].phone.empty());
+        writePatientToFile(patientCount);
+        cout << "Registration successful!\n";
+        patientCount++;
+    }
+    else
+    {
+        cout << "Patient database is full. Cannot register more patients.\n";
+    }
+}
+void writePatientToFile(int index)
+{
+    ofstream file("patients.txt", ios::app);
+    if (file.is_open())
+    {
+        file << patients[index].name << ","
+            << patients[index].age << ","
+            << patients[index].gender << ","
+            << patients[index].disability << ","
+            << "+92" << patients[index].phone << "\n";
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening patients.txt file.\n";
+    }
+}
+void bookAppointment()
+{
+    system("Cls");
+    if (appointmentCount < 100)
+    {
+        cout << "Doctors Currently Enrolled:\n";
+        for (int i = 0; i < doctorCount; ++i)
+        {
+            cout << i + 1 << ". " << doctors[i].name << " (" << doctors[i].specialty << ")\n";
+        }
+
+        int doctorChoice;
+        cout << "Select a doctor by entering the corresponding number: ";
+        cin >> doctorChoice;
+
+        if (doctorChoice >= 1 && doctorChoice <= doctorCount)
+        {
+            appointments[appointmentCount].doctorName = doctors[doctorChoice - 1].name;
+
+            cout << "Enter patient name: ";
+            cin.ignore();
+            getline(cin, appointments[appointmentCount].patientName);
+            cout << "Enter appointment time: ";
+            getline(cin, appointments[appointmentCount].time);
+
+            writeAppointmentsToFile();
+            cout << "Appointment booked successfully!\n";
+            appointmentCount++;
+        }
+        else
+        {
+            cout << "Invalid doctor choice. Booking appointment failed.\n";
+        }
+    }
+    else
+    {
+        cout << "Appointment database is full. Cannot book more appointments.\n";
+    }
+}
+void writeAppointmentsToFile()
+{
+    ofstream file("appointments.txt", ios::app);
+    if (file.is_open())
+    {
+        file << appointments[appointmentCount].doctorName << ","
+            << appointments[appointmentCount].patientName << ","
+            << appointments[appointmentCount].time << "\n";
+
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening appointments.txt file.\n";
+    }
+}
+void viewAllAppointments()
+{
+    system("Cls");
+    readAppointmentsFromFile();
+    cout << "All Appointments:\n";
+    cout << appointmentCount;
+    for (int i = 0; i < appointmentCount; ++i)
+    {
+        cout << "Doctor: " << appointments[i].doctorName << "\n";
+        cout << "Patient: " << appointments[i].patientName << "\n";
+        cout << "Time: " << appointments[i].time << "\n\n";
+    }
+}
+void viewOneAppointment()
+{
+    system("Cls");
+    readAppointmentsFromFile();
+    string patientName;
+    cout << "Enter patient name: ";
+    cin.ignore();
+    getline(cin, patientName);
+    cout << "Appointments for " << patientName << ":\n";
+    for (int i = 0; i < appointmentCount; ++i)
+    {
+        if (appointments[i].patientName == patientName)
+        {
+            cout << "Doctor: " << appointments[i].doctorName << "\n";
+            cout << "Time: " << appointments[i].time << "\n\n";
+        }
+    }
+}
+void viewPrescription()
+{
+    system("Cls");
+    readPrescriptionsFromFile();
+    string patientName;
+    cout << "Enter patient name: ";
+    cin.ignore();
+    getline(cin, patientName);
+    cout << "Prescription for " << patientName << ":\n";
+    for (int i = 0; i < prescriptionCount; ++i)
+    {
+        if (prescriptions[i].patientName == patientName)
+        {
+            cout << "Prescription: " << prescriptions[i].prescription << "\n\n";
+            return;
+        }
+    }
+    cout << "No prescription found for " << patientName << "\n";
+}
+void doctorRegistration()
+{
+    system("Cls");
+    if (doctorCount < 100)
+    {
+        cout << "Enter doctor details:\n";
+        cout << "Name: ";
+        cin.ignore();
+        getline(cin, doctors[doctorCount].name);
+        cout << "Specialty: ";
+        getline(cin, doctors[doctorCount].specialty);
+        cout << "Gender (M/F): ";
+        cin >> doctors[doctorCount].gender;
+        cout << "Shift: ";
+        cin.ignore();
+        getline(cin, doctors[doctorCount].shift);
+        writeDoctorsToFile();
+        cout << "Doctor registration successful!\n";
+        doctorCount++;
+    }
+    else
+    {
+        cout << "Doctor database is full. Cannot register more doctors.\n";
+    }
+}
+void writeDoctorsToFile()
+{
+    ofstream file("doctors.txt", ios::app);
+    if (file.is_open())
+    {
+        file << doctors[doctorCount].name << ","
+            << doctors[doctorCount].specialty << ","
+            << doctors[doctorCount].gender << ","
+            << doctors[doctorCount].shift << "\n";
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening doctors.txt file.\n";
+    }
+}
+void seeAppointments(const string& doctorName)
+{
+    system("Cls");
+    readAppointmentsFromFile();
+    cout << "Appointments for " << doctorName << ":\n";
+    for (int i = 0; i < appointmentCount; ++i)
+    {
+        if (appointments[i].doctorName == doctorName)
+        {
+            cout << "Patient: " << appointments[i].patientName << "\n";
+            cout << "Time: " << appointments[i].time << "\n\n";
+        }
+    }
+}
+void writePrescription()
+{
+    system("Cls");
+    if (prescriptionCount < 100)
+    {
+        cout << "Enter prescription details:\n";
+        cout << "Patient Name: ";
+        cin.ignore();
+        getline(cin, prescriptions[prescriptionCount].patientName);
+        cout << "Prescription: ";
+        getline(cin, prescriptions[prescriptionCount].prescription);
+        ofstream file("prescriptions.txt", ios::app);
+        if (file.is_open())
+        {
+            file << prescriptions[prescriptionCount].patientName << ","
+                << prescriptions[prescriptionCount].prescription << "\n";
+            file.close();
+        }
+        else
+        {
+            cout << "Error opening prescriptions.txt file.\n";
+        }
+        cout << "Prescription written successfully!\n";
+        prescriptionCount++;
+    }
+    else
+    {
+        cout << "Prescription database is full. Cannot write more prescriptions.\n";
+    }
+}
+void readPrescriptionsFromFile()
+{
+    system("Cls");
+    ifstream file("prescriptions.txt");
+    if (file.is_open())
+    {
+        while (!file.eof())
+        {
+            getline(file, prescriptions[prescriptionCount].patientName, ',');
+            getline(file, prescriptions[prescriptionCount].prescription);
+            prescriptionCount++;
+        }
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening prescriptions.txt file.\n";
+    }
+}
+void readAppointmentsFromFile()
+{
+    system("Cls");
+    ifstream file("appointments.txt");
+    if (file.is_open())
+    {
+
+        appointmentCount = 0;
+
+        while (file >> ws && getline(file, appointments[appointmentCount].doctorName, ',') &&
+            getline(file, appointments[appointmentCount].patientName, ',') &&
+            getline(file, appointments[appointmentCount].time))
+        {
+            appointments[appointmentCount].doctorName = trim(appointments[appointmentCount].doctorName);
+            appointments[appointmentCount].patientName = trim(appointments[appointmentCount].patientName);
+            appointments[appointmentCount].time = trim(appointments[appointmentCount].time);
+
+            if (!appointments[appointmentCount].doctorName.empty() &&
+                !appointments[appointmentCount].patientName.empty())
+            {
+                appointmentCount++;
+            }
+        }
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening appointments.txt file.\n";
+    }
+}
+
+
+void readPatientsFromFile()
+{
+    system("Cls");
+    ifstream file("patients.txt");
+    if (file.is_open())
+    {
+
+        patientCount = 0;
+
+        while (!file.eof())
+        {
+            getline(file, patients[patientCount].name, ',');
+            file >> patients[patientCount].age;
+            file.ignore();
+            file >> patients[patientCount].gender;
+            file.ignore();
+            getline(file, patients[patientCount].disability, ',');
+            getline(file, patients[patientCount].phone);
+
+            patients[patientCount].name = trim(patients[patientCount].name);
+            patients[patientCount].disability = trim(patients[patientCount].disability);
+            patients[patientCount].phone = trim(patients[patientCount].phone);
+
+            if (!patients[patientCount].name.empty())
+            {
+                patientCount++;
+            }
+        }
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening patients.txt file.\n";
+    }
+}
+
+void readfromDfile()
+{
+    system("Cls");
+    ifstream file("doctors.txt");
+    if (file.is_open())
+    {
+        while (!file.eof())
+        {
+            getline(file, doctors[doctorCount].name, ',');
+            getline(file, doctors[doctorCount].specialty, ',');
+            getline(file, doctors[doctorCount].gender, ',');
+            getline(file, doctors[doctorCount].shift);
+            doctorCount++;
+        }
+        file.close();
+    }
+    else
+    {
+        cout << "Error opening doctors.txt file.\n";
+    }
+}
+string trim(const string& str)
+{
+    size_t first = str.find_first_not_of(' ');
+    if (string::npos == first)
+    {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+
+}
+
